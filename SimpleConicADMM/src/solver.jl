@@ -56,22 +56,33 @@ end
 
 import SuiteSparse
 struct Cache{T}
-    # TODO Use this cache to store data precomputed for each iteration
+    IQ::SparseMatrixCSC{T,Int}
 end
 
 function setup(data::Data{T}) where {T}
     m, n = size(data.A)
+    A = data.A
+    b = data.b
+    c = data.c
+    IM = [I A'; -A I]
+    h = [c; b]
+    IQ = [
+        IM h
+        -h' 1
+    ]
     # TODO Precomputes quantitiees here
     solution = Solution{T}(n + m)
     cache = Cache{T}(
-        # TODO Add precomputed quantities here
+        IQ
     )
     return solution, cache
 end
 
 function project_affine(cache, wxy, wτ, n)
-    uxy = wxy # FIXME correct this line
-    uτ = wτ # FIXME correct this line
+    w = [wxy; wτ]
+    u = cache.IQ \ w
+    uxy = u[1:end-1]
+    uτ = u[end]
     return uxy, uτ
 end
 
@@ -80,11 +91,17 @@ function _set(cones, ci::MOI.ConstraintIndex{F,S}) where {F,S}
     return MOI.Utilities.set_with_dimension(S, d)
 end
 
+import MathOptSetDistances
 function _project_cones(cones, u, w, cis, n)
     for ci in cis
         cone = _set(cones, ci)
+        dual = MOI.dual_set(cone)
         rows = MOI.Utilities.rows(cones, ci)
-        u[n .+ rows] = w[n .+ rows] # FIXME correct this line
+        u[n .+ rows] = MathOptSetDistances.projection_on_set(
+            MathOptSetDistances.DefaultDistance(),
+            w[n .+ rows],
+            dual,
+        )
     end
 end
 
@@ -100,8 +117,9 @@ end
 function iterate!(sol::Solution{T}, cache, cones, n) where {T}
     ũxy, ũτ = project_affine(cache, sol.uxy + sol.vrs, sol.uτ + sol.vκ, n)
     sol.uxy = project_cones(cones, ũxy - sol.vrs, n)
-    sol.uτ = ũτ # FIXME correct this line
-    # TODO update `vrs` and `vκ`
+    sol.uτ = max(zero(T), ũτ - sol.vκ)
+    sol.vrs = sol.vrs - ũxy + sol.uxy
+    sol.vκ = sol.vκ - ũτ + sol.uτ
     return
 end
 
