@@ -14,6 +14,6 @@ No prior knowledge in Julia, JuMP or MathOptInterface is required.
 
 ### Resources
 
-We will start with [this Julia tutorial](@ref).
+We will start with [this Julia tutorial](https://github.com/odow/jump-training-materials).
 We then write a Julia implementation of the SCS algorithm as detailed [here](https://web.stanford.edu/~boyd/papers/pdf/scs_long.pdf).
 Use the `SimpleConicADMM` folder as starting point.
