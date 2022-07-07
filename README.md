@@ -11,3 +11,9 @@ No prior knowledge in Julia, JuMP or MathOptInterface is required.
 * A laptop.
 * Julia v1.6 or v1.7.
 * An editor of Julia scripts (e.g. [Julia in Visual Studio Code](https://code.visualstudio.com/docs/languages/julia)) or Jupyter notebooks with [IJulia](https://github.com/JuliaLang/IJulia.jl).
+
+### Resources
+
+We will start with [this Julia tutorial](@ref).
+We then write a Julia implementation of the SCS algorithm as detailed [here](https://web.stanford.edu/~boyd/papers/pdf/scs_long.pdf).
+Use the `SimpleConicADMM` folder as starting point.
